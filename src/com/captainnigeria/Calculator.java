@@ -27,36 +27,36 @@ public class Calculator extends JFrame {
         setSize(420, 520);
         setLocationRelativeTo(null);
 
-        CalculatorScreen resultLabel = new CalculatorScreen("ResultLabel", "0", 50F);;
+        CalculatorScreen resultLabel = new CalculatorScreen("ResultLabel", "0", 30F);;
         resultLabel.setForeground(Color.lightGray.brighter());
         resultLabel.setBounds(0, 7, 380, 100);
 
-        CalculatorScreen equationLabel = new CalculatorScreen("EquationLabel", "", 16F);
-        equationLabel.setBounds(0, 80, 380, 100);
-        equationLabel.setToOriginalColor();
+        CalculatorScreen textLabel = new CalculatorScreen("EquationLabel", "", 16F);
+        textLabel.setBounds(0, 80, 380, 100);
+        textLabel.setToOriginalColor();
 
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.DARK_GRAY.darker());
         mainPanel.setLayout(null);
 
-        CalculatorButton.addNumberButtons(equationLabel, this, mainPanel);
-        CalculatorButton.addOperatorButtons(equationLabel, this, mainPanel);
+        CalculatorButton.addNumberButtons(textLabel, this, mainPanel);
+        CalculatorButton.addOperatorButtons(textLabel, this, mainPanel);
 
         JButton equalsButton = new CalculatorButton("Equals", "=", Color.WHITE, Color.red);
-        equalsButton.addActionListener(e -> ButtonOperationManager.equationOperation(equationLabel, resultLabel, this));
+        equalsButton.addActionListener(e -> ButtonOperationManager.equationOperation(textLabel, resultLabel, this));
         equalsButton.setBounds(295, 430, 85, 43);
 
         JButton clearButton = new CalculatorButton("Clear", "C", Color.WHITE, Color.red);
-        clearButton.addActionListener((e) -> ButtonOperationManager.clearOperation(equationLabel, resultLabel));
+        clearButton.addActionListener((e) -> ButtonOperationManager.clearOperation(textLabel, resultLabel));
         clearButton.setBounds(205, 180, 85, 43);
 
         JButton deleteButton = new CalculatorButton("Delete", "DEL", Color.white, Color.red);
-        deleteButton.addActionListener((e) -> ButtonOperationManager.deleteOperation(equationLabel));
+        deleteButton.addActionListener((e) -> ButtonOperationManager.deleteOperation(textLabel));
         deleteButton.setBounds(295, 180, 85, 43);
 
 
         mainPanel.add(resultLabel);
-        mainPanel.add(equationLabel);
+        mainPanel.add(textLabel);
         mainPanel.add(equalsButton);
         mainPanel.add(clearButton);
         mainPanel.add(deleteButton);
@@ -90,16 +90,16 @@ public class Calculator extends JFrame {
 
 
         if (result % 1 == 0) {
-            if (result > 10000000){
+            if (result > 10000000000000L){
                 return formatter.format(result);
             }
-            return String.valueOf((int) result);
+            return String.format("%,.0f", result);
         }
 
         double truncatedDouble;
         try {
             truncatedDouble = BigDecimal.valueOf(result)
-                    .setScale(3, RoundingMode.HALF_UP)
+                    .setScale(7, RoundingMode.HALF_UP)
                     .doubleValue();
         } catch (NumberFormatException e) {
             return "Invalid Expression";
@@ -108,8 +108,7 @@ public class Calculator extends JFrame {
         String doubleResult = String.valueOf(truncatedDouble);
         int resultCount = (int) Arrays.stream(doubleResult.split("")).count();
 
-        if (resultCount > 7){
-            System.out.println("Hey");
+        if (resultCount > 10){
             doubleResult = formatter.format(truncatedDouble);
         }
 
@@ -146,9 +145,6 @@ public class Calculator extends JFrame {
         char[] operators = {'√', '^', '÷', '×', '+', '(', ')', '-'};
         List<String> postFix = new ArrayList<>();
         Stack<String> stack = new Stack<>();
-
-        System.out.println("Text Values -" + Arrays.toString(textValues));
-
         for (String input : textValues) {
             if (!Arrays.toString(operators).contains(input)) {
                 postFix.add(input);
@@ -200,21 +196,15 @@ public class Calculator extends JFrame {
 
     public Double doCalculation(String operator, double... num) {
 
-        switch (operator) {
-            case "+":
-                return add.apply(num[0], num[1]);
-            case "-":
-                return subtract.apply(num[0], num[1]);
-            case "÷":
-                return divide.apply(num[0], num[1]);
-            case "√":
-                return squareRoot.apply(num[0]);
-            case "^":
-                return square.apply(num[0], num[1]);
-            case "×":
-                return multiply.apply(num[0], num[1]);
-        }
-        return 0.0;
+        return switch (operator) {
+            case "+" -> add.apply(num[0], num[1]);
+            case "-" -> subtract.apply(num[0], num[1]);
+            case "÷" -> divide.apply(num[0], num[1]);
+            case "√" -> squareRoot.apply(num[0]);
+            case "^" -> square.apply(num[0], num[1]);
+            case "×" -> multiply.apply(num[0], num[1]);
+            default -> 0.0;
+        };
     }
 
     public int getPrecedence(String operator) {
@@ -236,7 +226,6 @@ public class Calculator extends JFrame {
         }
         return "";
     }
-
 
 }
 
